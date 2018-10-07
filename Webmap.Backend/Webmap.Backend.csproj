@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Webmap.Common\Webmap.Common.csproj" />
+    <ProjectReference Include="..\Webmap.Data\Webmap.Data.csproj" />
+  </ItemGroup>
+
+</Project>
