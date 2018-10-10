@@ -1,8 +1,9 @@
 ﻿using Webmap.Common;
+using Webmap.Common.Primitives;
 
 namespace Webmap.Data
 {
-    public class MapNode
+    internal class MapNode
     {
         public long Index { get; }
 

@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Webmap.Common.Primitives;
 using Webmap.Data;
 
 namespace WebMap.Api.Models
 {
-    public class PolyLine
+    public class PolyShape
     {
         public List<Coordinate> Coordinates { get; }
 
-        public bool IsClosed { get; }
+        public string Type { get; }
 
-        public PolyLine(MapWay way)
+        public PolyShape(List<Coordinate> coordinates, string type)
         {
-            this.Coordinates = way.Nodes.Select(n => new Coordinate(n.Coordinate)).ToList();
-            this.IsClosed = way.IsClosed;
+            this.Coordinates = coordinates;
+            this.Type = type;
         }
     }
 }

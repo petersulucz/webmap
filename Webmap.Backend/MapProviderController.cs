@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Webmap.Backend.MapTypes;
 using Webmap.Common;
+using Webmap.Common.Primitives;
 using Webmap.Data;
 
 namespace Webmap.Backend

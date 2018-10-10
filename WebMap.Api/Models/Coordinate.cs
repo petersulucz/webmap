@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Webmap.Common;
+using Webmap.Common.Primitives;
 
 namespace WebMap.Api.Models
 {

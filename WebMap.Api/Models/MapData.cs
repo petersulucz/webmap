@@ -8,13 +8,13 @@ namespace WebMap.Api.Models
 {
     public class MapData
     {
-        public List<PolyLine> Lines { get; }
+        public List<PolyShape> Lines { get; }
 
         public Coordinate MinBound { get; }
 
         public Coordinate MaxBound { get; }
 
-        public MapData(List<PolyLine> lines, Coordinate minBound, Coordinate maxBound)
+        public MapData(List<PolyShape> lines, Coordinate minBound, Coordinate maxBound)
         {
             this.Lines = lines;
             this.MinBound = minBound;

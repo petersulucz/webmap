@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Webmap.Common;
+using Webmap.Common.Primitives;
 
 namespace Webmap.Data
 {
-    public class MapWay : IBoundable
+    internal class MapWay : IBoundable
     {
         /// <summary>
         /// Gets the ID of the way.
@@ -51,7 +52,7 @@ namespace Webmap.Data
                 }
             }
 
-            this.IsClosed = this.Nodes.First() == this.Nodes.Last();
+            this.IsClosed = this.Nodes.First().Index == this.Nodes.Last().Index;
 
             this.MinBound = this.Nodes.First().Coordinate;
             this.MaxBound = this.Nodes.First().Coordinate;

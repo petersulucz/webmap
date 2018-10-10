@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Webmap.Common;
+using Webmap.Common.Primitives;
 using Webmap.Data;
 
 namespace Webmap.Backend.MapTypes
@@ -15,7 +16,7 @@ namespace Webmap.Backend.MapTypes
 
         public override string Name => "Highways";
 
-        public override bool IsMatch(MapWay mapWay)
+        public override bool IsMatch(MapShape mapWay)
         {
             if (mapWay.Tags.TryGetValue("highway", out var heighwayType) && heighwayType.StartsWith("motorway", StringComparison.OrdinalIgnoreCase))
             {

@@ -3,14 +3,15 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Xml;
     using Webmap.Common;
+    using Webmap.Common.Primitives;
 
     public class MapDefinition
     {
         private readonly Dictionary<long, MapNode> nodes;
         private readonly Dictionary<long, MapWay> ways;
-        private readonly Dictionary<long, MapPolyWay> relations;
         private readonly XmlReader reader;
 
         internal MapDefinition(XmlReader reader)
@@ -18,7 +19,6 @@
             this.reader = reader;
             this.nodes = new Dictionary<long, MapNode>();
             this.ways = new Dictionary<long, MapWay>();
-            this.relations = new Dictionary<long, MapPolyWay>();
 
             this.ParseOsmNode(ref this.MinBound, ref this.MaxBound);
             this.ParseFirstSetOfNodes();
@@ -83,7 +83,7 @@
         /// Reads the ways from the file.
         /// </summary>
         /// <returns>The ways.</returns>
-        public IEnumerable<MapWay> ReadWays()
+        public IEnumerable<MapShape> ReadWays()
         {
             do {
                 switch (reader.Name)
@@ -95,13 +95,13 @@
                     case "way":
                         var nextWay = ParseMapWay();
                         this.ways.Add(nextWay.Id, nextWay);
-                        yield return nextWay;
+                        yield return MapShape.Create(nextWay, nextWay.Tags);
                         break;
                     case "relation":
                         {
-                            if (true == this.TryParseRelation(out var nextRelation))
+                            foreach(var relation in this.TryParseRelation())
                             {
-                                this.relations.Add(nextRelation.Id, nextRelation);
+                                yield return relation;
                             }
                         }
                         break;
@@ -111,16 +111,8 @@
             yield break;
         }
 
-        /// <summary>
-        /// Gets the more complex polygons.
-        /// </summary>
-        /// <returns>The complex polygons.</returns>
-        public IEnumerable<MapPolyWay> ReadPolyWays()
-        {
-            return this.relations.Values;
-        }
 
-        private bool TryParseRelation(out MapPolyWay result)
+        private IEnumerable<MapShape> TryParseRelation()
         {
             if (false == string.Equals("relation", this.reader.Name, StringComparison.OrdinalIgnoreCase))
             {
@@ -173,15 +165,51 @@
                         break;
                 }
             }
+
             loopexit:
-            if (nodes.Count > 0)
+
+            if (false == outer.Any())
             {
-                result = new MapPolyWay(id, outer, inner, tags);
-                return true;
+                yield break;
             }
 
-            result = null;
-            return false;
+            var outerFlat = MapDefinition.FlattenMapways(outer).ToList();
+
+            foreach (var outerWay in outerFlat)
+            {
+                yield return MapShape.Create(outerWay, tags);
+            }
+        }
+
+        /// <summary>
+        /// Flatten all map ways.
+        /// </summary>
+        /// <param name="ways">The ways to flatten.</param>
+        /// <returns>The flattened ways.</returns>
+        private static IEnumerable<MapWay> FlattenMapways(IEnumerable<MapWay> ways)
+        {
+            var currentNodes = new List<MapNode>();
+            foreach(var way in ways)
+            {
+                if (way.IsClosed)
+                {
+                    yield return way;
+                    continue;
+                }
+
+                currentNodes.AddRange(way.Nodes);
+
+                if (currentNodes.Last().Index == currentNodes.First().Index)
+                {
+                    yield return new MapWay(0, currentNodes, Enumerable.Empty<KeyValuePair<string, string>>());
+                    currentNodes = new List<MapNode>();
+                }
+            }
+
+            if (currentNodes.Any())
+            {
+                yield return new MapWay(0, currentNodes, Enumerable.Empty<KeyValuePair<string, string>>());
+            }
         }
 
         /// <summary>

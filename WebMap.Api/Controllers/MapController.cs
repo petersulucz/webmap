@@ -8,6 +8,7 @@ using Webmap.Data;
 using WebMap.Api.Models;
 using Webmap.Common;
 using WebMap.Api.Services;
+using Webmap.Common.Primitives;
 
 namespace WebMap.Api.Controllers
 {

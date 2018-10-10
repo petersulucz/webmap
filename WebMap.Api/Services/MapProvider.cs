@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Webmap.Backend;
 using Webmap.Common;
+using Webmap.Common.Primitives;
 using Webmap.Data;
 using WebMap.Api.Models;
 
@@ -30,13 +31,13 @@ namespace WebMap.Api.Services
             var mapref = this.provider;
             if (mapref == null || false == mapref.Providers.TryGetValue(type, out var mapProv))
             {
-                return new MapData(new List<PolyLine>(), new Coordinate(lowBound), new Coordinate(highBound));
+                return new MapData(new List<PolyShape>(), new Coordinate(lowBound), new Coordinate(highBound));
             }
 
-            var lines = new List<PolyLine>();
+            var lines = new List<PolyShape>();
             foreach (var line in mapProv.GetWays(lowBound, highBound))
             {
-                lines.Add(new PolyLine(line));
+                lines.Add(PolyshapeBuilder.Create(line));
             }
 
             return new MapData(lines, new Coordinate(Vector2.Max(mapref.LowBound, lowBound)), new Coordinate(Vector2.Min(mapref.HighBound, highBound)));

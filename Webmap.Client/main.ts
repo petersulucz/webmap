@@ -48,15 +48,8 @@ class Coordinate implements ICoordinate
 interface IPolyLine
 {
     coordinates : Array<ICoordinate>;
-    isClosed : boolean;
-}
-
-interface IPolyRoad extends IPolyLine{
-
-}
-
-interface IPolyLand extends IPolyLine{
-
+    innerShapes : Array<IPolyLine>;
+    type : string;
 }
 
 interface IMapDefinition
@@ -130,6 +123,33 @@ class MapDrawer
         return new Coordinate(lat, long);
     }
 
+    DrawPath(poly : IPolyLine, graphics : CanvasRenderingContext2D, map : IMapDefinition)
+    {
+        for(let i = 0; i < poly.coordinates.length; i++)
+        {
+            let pnt = this.MapPoint(map, poly.coordinates[i]);
+
+            if (i === 0)
+            {
+                graphics.moveTo(pnt.longitude, pnt.latitude);
+            }
+            else
+            {
+                graphics.lineTo(pnt.longitude, pnt.latitude);
+            }
+        }
+        graphics.closePath();
+        
+        if (!poly.innerShapes)
+        {
+            return;
+        }
+
+        poly.innerShapes.forEach(inner => {
+            this.DrawPath(inner, graphics, map);
+        });
+    }
+
     Draw(mapjson : IMapDefinition, color : ColorDefinition)
     {
         let graphics = this.canvas.getContext("2d");
@@ -139,32 +159,16 @@ class MapDrawer
         graphics.strokeStyle = color.Color;
         graphics.lineWidth = color.Width;
 
-        graphics.beginPath();
-        mapjson.lines.filter(l => l.isClosed).forEach(line => {
+        mapjson.lines.filter(l => l.type.toLowerCase() === "polygon").forEach(line => {
             let first = true;
-            
-            line.coordinates.forEach(c => {
-                let pnt = this.MapPoint(mapjson, c);
 
-                if (first)
-                {
-                    graphics.moveTo(pnt.longitude, pnt.latitude);
-                    first = false;
-                }
-                else
-                {
-                    graphics.lineTo(pnt.longitude, pnt.latitude);
-                }
-            });
-
-            
+            graphics.beginPath();
+            this.DrawPath(line, graphics, mapjson);
+            graphics.fill('evenodd');
         });
-
-        graphics.closePath();
-        graphics.fill();
         
         graphics.beginPath();
-        mapjson.lines.filter(l => !l.isClosed).forEach(line => {
+        mapjson.lines.filter(l => l.type.toLowerCase() === "line").forEach(line => {
             let first = true;
             line.coordinates.forEach(c => {
                 let pnt = this.MapPoint(mapjson, c);
@@ -195,22 +199,22 @@ async function loadAll(){
 
     let dimensionRaw = {
         "min" : {
-            "latitude" : 47.6001000,
-            "longitude" : -122.2093000
+            "latitude" : 47.4657,
+            "longitude" : -122.4093000
         },
         "max" : {
-            "latitude" : 47.6289000,
-            "longitude" : -122.1787000
+            "latitude" : 47.7601,
+            "longitude" : -122.087000
         }
     };
-    dimensionRaw = JSON.parse(await Http.GetAsync(`${baseUrl}/dimension`));
+    //dimensionRaw = JSON.parse(await Http.GetAsync(`${baseUrl}/dimension`));
 
     let dimension = dimensionRaw as IDimension;
 
     let baseTypes = new Array<ColorDefinition>();
     baseTypes.push(new ColorDefinition("schools", "orange"));
     baseTypes.push(new ColorDefinition("parks", "lightgreen"));
-    baseTypes.push(new ColorDefinition("water", "blue"));
+    baseTypes.push(new ColorDefinition("water", "lightblue"));
     baseTypes.push(new ColorDefinition("highways", "red", 4));
     baseTypes.push(new ColorDefinition("roads", "black"));
     baseTypes.push(new ColorDefinition("footpaths", "gray"));

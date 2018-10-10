@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Webmap.Common
+namespace Webmap.Common.Primitives
 {
     public struct Vector2
     {
@@ -31,6 +31,12 @@ namespace Webmap.Common
         public double Magnitude => Math.Sqrt(this.X * this.X + this.Y * this.Y);
 
         public static Vector2 One => new Vector2(1, 1);
+
+        public static Vector2 MinValue => new Vector2(double.MinValue, double.MinValue);
+
+        public static Vector2 MaxValue => new Vector2(double.MaxValue, double.MaxValue);
+
+        public static Vector2 Zero => new Vector2();
 
         public static Vector2 operator +(Vector2 a, Vector2 b)
         {
